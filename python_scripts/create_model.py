@@ -13,23 +13,25 @@ if __name__ == '__main__':
     train = pd.read_csv("../train.csv")
     test = pd.read_csv("../test.csv")
 
+    print(train.head(3))
+
     logging.info('Cleaning train dataset...')
     train_x = clean(train)
     train_y = train.loc[:, "OutcomeType"]
 
-    logging.info('Cleaning test dataset...')
-    test_x = clean(test)
-
     enc = LabelEncoder()
     enc.fit(train_y)
     train_yt = enc.transform(train_y)
+
+    logging.info('Cleaning test dataset...')
+    test_x = clean(test)
 
     logging.info(train_x.head(10))
 
     xgb_params = {
                     'learning_rate': 0.05,
                     'max_depth': 6,
-                    'n_estimators': 1000,
+                    'n_estimators': 500,
                     'num_class': 5,
                     'objective': 'multi:softprob',
                     'subsample': 0.8}

@@ -20,16 +20,11 @@ def transform_dates(val):
         return num_val
 
 
-def transform_dataset(df):
-    result = df
-    result.loc[:, "AgeuponOutcome"] = result.loc[:, "AgeuponOutcome"].apply(transform_dates)
-    # result["AgeuponOutcome"].fillna(result['AgeuponOutcome'].dropna().mean(), inplace=True)
-    result["AgeuponOutcome"].fillna(0, inplace=True)
-    return result
-
 def clean(dataset):
     # First we remove "Mix" from all breeds and add additional categorical variable to the dataset
     result = pd.DataFrame()
+
+    result["AgeuponOutcome"] = dataset.loc[:, "AgeuponOutcome"].apply(transform_dates).fillna(0)
 
     result['AnimalType'] = dataset['AnimalType']
     result["Mix"] = False
