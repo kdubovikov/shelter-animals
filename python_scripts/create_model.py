@@ -13,8 +13,6 @@ if __name__ == '__main__':
     train = pd.read_csv("../train.csv")
     test = pd.read_csv("../test.csv")
 
-    # print(train.head(3))
-
     logging.info('Cleaning train dataset...')
     train_x = clean(train)
     train_y = train.loc[:, "OutcomeType"]

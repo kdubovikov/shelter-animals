@@ -1,10 +1,8 @@
-import pandas as pd
-import re
-import matplotlib as plt
-import numpy as np
-from datetime import *
 import time
-from sklearn.preprocessing import LabelEncoder
+from datetime import *
+
+import pandas as pd
+
 
 def transform_dates(val):
     if pd.isnull(val):
@@ -73,6 +71,7 @@ def clean(dataset):
 
     # Color (take only primary color)
     result['Color'] = [x[0].replace(" ", "") for x in dataset['Color'].str.split('/').tolist()]
+
     # result['Color'] = enc.fit_transform(result['Color'])
     color_couts = dataset["Color"].value_counts()
     result["ColorFreq"] = [color_couts[x] for x in dataset["Color"]]
@@ -89,8 +88,5 @@ def clean(dataset):
     cols = ['Sterialized', 'AnimalType', 'Sex', 'Breed', 'Color']
     result = pd.get_dummies(result, columns=cols)
     result.drop(['AnimalType_Cat', 'Sex_Female'], axis=1, inplace=True)
-
-    #temp
-    # result["ID"] = dataset["AnimalID"]
 
     return result
