@@ -1,5 +1,5 @@
 import time
-from datetime import *
+from datetime import datetime
 
 import pandas as pd
 
@@ -42,7 +42,8 @@ def clean(dataset):
     # result["Breed"] = result["Breed"] .str.replace("//", "")
 
     # Finally, lets split the breeds and modify our dataset
-    result["Breed"] = result["Breed"] .apply(lambda x: pd.Series(x.split("/")))
+    result["Crosses"] = result["Breed"].apply(lambda x: len(x.split("/")))
+    result["Breed"] = result["Breed"].apply(lambda x: pd.Series(x.split("/")))
 
     result["Breed"].columns = ['Breed', 'SecondaryBreed']
     result["Breed"] = result["Breed"].apply(lambda x: x.replace(" ", ""))
@@ -68,13 +69,15 @@ def clean(dataset):
     # Names
     result['HasName'] = ~dataset['Name'].isnull()
     result['NameLength'] = dataset['Name'].str.len()
+    result['NameLength'].fillna(0, inplace=True)
 
+    result["ColorCount"] = dataset["Color"].apply(lambda x: len(x.split("/")) + 1)
     # Color (take only primary color)
     result['Color'] = [x[0].replace(" ", "") for x in dataset['Color'].str.split('/').tolist()]
 
     # result['Color'] = enc.fit_transform(result['Color'])
-    color_couts = dataset["Color"].value_counts()
-    result["ColorFreq"] = [color_couts[x] for x in dataset["Color"]]
+    color_counts = dataset["Color"].value_counts()
+    result["ColorFreq"] = [color_counts[x] for x in dataset["Color"]]
 
     sex = dataset['SexuponOutcome'].str.split(" ", expand=True)
     sex[1].fillna('Unknown', inplace=True)
