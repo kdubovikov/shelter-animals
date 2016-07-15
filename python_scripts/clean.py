@@ -36,11 +36,11 @@ def clean(dataset):
     result["Breed"] = dataset["Breed"].apply(lambda x: x.split(" Mix")[0])
 
     # Next we remove all of the colors which cause problems when we try to split mixed breeds
-    result["Breed"] = result["Breed"] .apply(lambda x: re.sub('Black\s?|Tan\s?', '', x))
+    # result["Breed"] = result["Breed"] .apply(lambda x: re.sub('Black\s?|Tan\s?', '', x))
 
     # After that let's remove dirty substrings left from previous replacements
-    result["Breed"] = result["Breed"] .apply(lambda x: re.sub('^/', '', x))
-    result["Breed"] = result["Breed"] .str.replace("//", "")
+    # result["Breed"] = result["Breed"] .apply(lambda x: re.sub('^/', '', x))
+    # result["Breed"] = result["Breed"] .str.replace("//", "")
 
     # Finally, lets split the breeds and modify our dataset
     result["Breed"] = result["Breed"] .apply(lambda x: pd.Series(x.split("/")))
@@ -59,7 +59,7 @@ def clean(dataset):
     # Transform dates
     dates = dataset['DateTime'].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
 
-    result["Time"] = dates.apply(lambda x: x.hour + x.minute / 60)
+    result["Time"] = dates.apply(lambda x: time.mktime(x.timetuple()))
     result["Year"] = dates.apply(lambda x: x.year)
     result["Month"] = dates.apply(lambda x: x.month)
     result["Hour"] = dates.apply(lambda x: x.hour)
@@ -72,7 +72,7 @@ def clean(dataset):
     result['NameLength'].fillna(0, inplace=True)
 
     # Color (take only primary color)
-    result['Color'] = [x[0].replace(" ", "") for x in dataset['Color'].str.split('/').tolist()]
+    # result['Color'] = [x[0] for x in dataset['Color'].str.split('/').tolist()]
     # result['Color'] = enc.fit_transform(result['Color'])
     color_couts = dataset["Color"].value_counts()
     result["ColorFreq"] = [color_couts[x] for x in dataset["Color"]]
@@ -88,6 +88,6 @@ def clean(dataset):
 
     cols = ['Sterialized', 'AnimalType', 'Sex', 'Breed', 'Color']
     result = pd.get_dummies(result, columns=cols)
-    result.drop(['AnimalType_Cat'], axis=1, inplace=True)
+    result.drop(['AnimalType_Cat', 'Sex_Female'], axis=1, inplace=True)
 
     return result
