@@ -29,30 +29,32 @@ def clean(dataset):
     result['AnimalType'] = dataset['AnimalType']
     result["Mix"] = False
     result.loc[dataset["Breed"].str.contains("Mix"), "Mix"] = True
-    result["Pure"] = False
-    result.loc[~dataset["Breed"].str.contains("Mix"), "Pure"] = True
+    # result["Pure"] = False
+    # result.loc[~dataset["Breed"].str.contains("Mix"), "Pure"] = True
 
     result["Breed"] = dataset["Breed"]
-    # result["Breed"] = dataset["Breed"].apply(lambda x: x.split(" Mix")[0])
-    #
-    # # Next we remove all of the colors which cause problems when we try to split mixed breeds
-    # result["Breed"] = result["Breed"] .apply(lambda x: re.sub('Black\s?|Tan\s?', '', x))
-    #
-    # # After that let's remove dirty substrings left from previous replacements
-    # result["Breed"] = result["Breed"] .apply(lambda x: re.sub('^/', '', x))
-    # result["Breed"] = result["Breed"] .str.replace("//", "")
-    #
-    # # Finally, lets split the breeds and modify our dataset
-    # result["Breed"] = result["Breed"] .apply(lambda x: pd.Series(x.split("/")))
-    # result["Breed"].columns = ['Breed', 'SecondaryBreed']
+    result["Breed"] = dataset["Breed"].apply(lambda x: x.split(" Mix")[0])
+
+    # Next we remove all of the colors which cause problems when we try to split mixed breeds
+    result["Breed"] = result["Breed"] .apply(lambda x: re.sub('Black\s?|Tan\s?', '', x))
+
+    # After that let's remove dirty substrings left from previous replacements
+    result["Breed"] = result["Breed"] .apply(lambda x: re.sub('^/', '', x))
+    result["Breed"] = result["Breed"] .str.replace("//", "")
+
+    # Finally, lets split the breeds and modify our dataset
+    result["Breed"] = result["Breed"] .apply(lambda x: pd.Series(x.split("/")))
+
+    result["Breed"].columns = ['Breed', 'SecondaryBreed']
+    result["Breed"] = result["Breed"].apply(lambda x: x.replace(" ", ""))
 
     # Drop infrequent breeds
     breed_counts = result["Breed"].value_counts()
     frequent_breeds = breed_counts[breed_counts > 10].to_dict().keys()
     result.loc[~result['Breed'].isin(frequent_breeds), "Breed"] = "Rare"
 
-    enc = LabelEncoder()
-    result['Breed'] = enc.fit_transform(result['Breed'])
+    # enc = LabelEncoder()
+    # result['Breed'] = enc.fit_transform(result['Breed'])
 
     # Transform dates
     dates = dataset['DateTime'].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
@@ -67,9 +69,10 @@ def clean(dataset):
     # Names
     result['HasName'] = dataset['Name'].isnull()
     result['NameLength'] = dataset['Name'].str.len()
+    result['NameLength'].fillna(0, inplace=True)
 
     # Color (take only primary color)
-    # result['Color'] = [x[0] for x in dataset['Color'].str.split('/').tolist()]
+    result['Color'] = [x[0].replace(" ", "") for x in dataset['Color'].str.split('/').tolist()]
     # result['Color'] = enc.fit_transform(result['Color'])
     color_couts = dataset["Color"].value_counts()
     result["ColorFreq"] = [color_couts[x] for x in dataset["Color"]]
@@ -83,7 +86,7 @@ def clean(dataset):
     # Not sure if this feature is MCAR
     result['Sex'].fillna('Unknown', inplace=True)
 
-    cols = ['Sterialized', 'AnimalType', 'Sex']
+    cols = ['Sterialized', 'AnimalType', 'Sex', 'Breed', 'Color']
     result = pd.get_dummies(result, columns=cols)
     result.drop(['AnimalType_Cat'], axis=1, inplace=True)
 
